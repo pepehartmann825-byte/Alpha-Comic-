@@ -52,17 +52,16 @@ h1{
   display:block;
 }
 
-/* SURF CENTER */
-#home{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+/* SURF HEADER (wird versteckt) */
+#surfUI{
+  margin-bottom:10px;
 }
 
-/* CENTER BOX */
+/* CENTER */
 .centerBox{
   width:100%;
   max-width:600px;
+  margin:auto;
 }
 
 /* CARDS */
@@ -74,7 +73,7 @@ h1{
   font-size:16px;
 }
 
-/* INPUTS */
+/* INPUT */
 input,button{
   padding:14px;
   margin:6px;
@@ -100,13 +99,6 @@ button:hover{
   opacity:0.7;
 }
 
-/* GRID */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:12px;
-}
-
 /* EDITOR */
 #editorBox{
   display:none;
@@ -117,7 +109,7 @@ button:hover{
   border:1px solid #222;
 }
 
-/* RANDOM TITLE */
+/* RANDOM */
 .randomTitle{
   margin-top:20px;
   opacity:0.8;
@@ -136,19 +128,23 @@ button:hover{
 <button onclick="show('profile')">👤 Profil</button>
 </div>
 
-<!-- 🏠 SURF -->
+<!-- 🏠 HOME -->
 <div id="home" class="screen active">
+
+<!-- SURF UI (wird versteckt bei Wechsel) -->
+<div id="surfUI">
 
 <h3>🏠 Surfen</h3>
 
 <input id="search" placeholder="Comic suchen..." oninput="filterComics()">
 
-<!-- EDITOR -->
 <div id="editorBox">
 <h4>🛠 Editor Mode</h4>
 <input id="title" placeholder="Titel">
 <input id="pages" placeholder="Seiten">
 <button onclick="addComic()">➕ Posten</button>
+</div>
+
 </div>
 
 <div id="feed"></div>
@@ -181,7 +177,6 @@ button:hover{
 <button onclick="editorLogin()">🛠 Editor aktivieren</button>
 
 <p id="status">Nicht eingeloggt</p>
-<p id="editorStatus">Editor: AUS</p>
 
 </div>
 
@@ -199,7 +194,6 @@ getDoc,
 setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* FIREBASE */
 const firebaseConfig = {
 apiKey: "YOUR_KEY",
 authDomain: "comic-tracker-11dce.firebaseapp.com",
@@ -218,7 +212,7 @@ let comics=[];
 let my=[];
 let editor=false;
 
-/* NAV */
+/* NAV SWITCH */
 window.show=function(id){
 
 document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
@@ -226,6 +220,13 @@ document.getElementById(id).classList.add("active");
 
 document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
 event.target.classList.add("active");
+
+/* 🟢 SURF UI HIDE/SHOW */
+if(id==="home"){
+document.getElementById("surfUI").style.display="block";
+}else{
+document.getElementById("surfUI").style.display="none";
+}
 
 }
 
@@ -264,15 +265,14 @@ load();
 
 /* EDITOR */
 window.editorLogin=function(){
-let pw=prompt("Editor Passwort:");
+let pw=prompt("Editor Passwort");
 if(pw==="1234"){
 editor=true;
-document.getElementById("editorStatus").innerText="Editor: AN";
 document.getElementById("editorBox").style.display="block";
 }
 }
 
-/* ADD */
+/* ADD COMIC */
 window.addComic=async function(){
 
 if(!editor)return;
@@ -307,10 +307,10 @@ function render(){
 let feed=document.getElementById("feed");
 feed.innerHTML="";
 
-/* 🏠 CENTER RESULTS */
 let centerBox=document.createElement("div");
 centerBox.className="centerBox";
 
+/* ALL COMICS */
 comics.forEach(c=>{
 
 let added=my.includes(c.id);
@@ -333,7 +333,7 @@ ${editor?`<button onclick="del('${c.id}')">🗑</button>`:""}
 
 feed.appendChild(centerBox);
 
-/* 🎲 RANDOM */
+/* RANDOM */
 let title=document.createElement("h3");
 title.className="randomTitle";
 title.innerText="🎲 Für dich empfohlen";
@@ -360,10 +360,9 @@ ${user?
 feed.appendChild(box);
 });
 
-/* 📚 COLLECTION */
+/* COLLECTION */
 let box=document.getElementById("myList");
 box.innerHTML="";
-
 let total=0;
 
 my.forEach(id=>{
@@ -380,7 +379,6 @@ document.getElementById("stats").innerText=
 
 /* ADD */
 window.add=async function(id){
-
 if(!my.includes(id)){
 my.push(id);
 await setDoc(doc(db,"users",user),{
@@ -388,19 +386,14 @@ password:document.getElementById("pass").value,
 comics:my
 });
 }
-
 render();
-
 }
 
 /* DELETE */
 window.del=async function(id){
-
 if(!editor)return;
-
 await deleteDoc(doc(db,"comics",id));
 load();
-
 }
 
 /* SEARCH */
@@ -439,7 +432,6 @@ feed.appendChild(centerBox);
 
 }
 
-/* START */
 load();
 
 </script>
